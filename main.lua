@@ -3,6 +3,8 @@ local lasers = {}
 local lasermap = {}
 local size = 16
 local mapsize = { x = 12, y = 9}
+local inhand = 0
+local pressed = {x = 0, y = 0}
 
 function love.load()
     map = sti("maps/level2.lua")
@@ -80,6 +82,8 @@ function love.draw()
     map:draw()
     love.graphics.setColor(0, 255, 0)
     love.graphics.print(tostring(map.layers),200,200)
+    love.graphics.print(inhand,200,220)
+    love.graphics.print(pressed.x.." "..pressed.y,200,240)
     for i = 1, mapsize.x do
         for j = 1, mapsize.y do
             if lasermap[i][j] == 2 or lasermap[i][j] == 12 or lasermap[i][j] == 22 or lasermap[i][j] == 32 or lasermap[i][j] == 3 or lasermap[i][j] == 13 or lasermap[i][j] == 23 or lasermap[i][j] == 33 then
@@ -148,7 +152,7 @@ function addLaserbeam()
                     current.x = current.x+movement.x
                     current.y = current.y+movement.y-1
                     movement = {x = 0, y = -1}
-                elseif lasermap[current.x+movement.x][current.y+movement.y] == 23 and movement.x == 0 and movement.y == -1 and (lasermap[current.x+movement.x+1][current.y+movement.y] == 0 or lasermap[current.x+movement.x+1][current.y+movement.y] == 9) then
+                elseif lasermap[current.x+movement.x][current.y+movement.y] == 23 and movement.x == 0 and movement.y == 1 and (lasermap[current.x+movement.x+1][current.y+movement.y] == 0 or lasermap[current.x+movement.x+1][current.y+movement.y] == 9) then
                     lasermap[current.x+movement.x+1][current.y+movement.y] = 9
                     current.x = current.x+movement.x+1
                     current.y = current.y+movement.y
@@ -171,6 +175,22 @@ function addLaserbeam()
                 end
                 loop = loop + 1
             until hitwall == true or loop >= mapsize.x*mapsize.y
+        end
+    end
+end
+
+function love.mousepressed(x, y, button, istouch)
+    x = math.ceil(x/size) 
+    y = math.ceil(y/size)
+    pressed.x = x
+    pressed.y = y
+    if button == 1 and x <= mapsize.x and y <= mapsize.y then         
+        if inhand == 0 and (lasermap[x][y] == 3 or lasermap[x][y] == 13 or lasermap[x][y] == 23 or lasermap[x][y] == 33) then 
+            inhand = lasermap[x][y] 
+            lasermap[x][y] = 0 
+        elseif inhand ~= 0 and (lasermap[x][y] == 0 or lasermap[x][y] == 9) then
+            lasermap[x][y] = inhand 
+            inhand = 0 
         end
     end
 end
